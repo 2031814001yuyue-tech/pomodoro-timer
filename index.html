@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🍅 番茄钟</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍅</text></svg>" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <!-- ===== Header ===== -->
+    <header class="header">
+      <h1 class="title">🍅 番茄钟</h1>
+      <div class="header-right">
+        <div class="user-bar" id="userBar" tabindex="0" role="button" aria-haspopup="true" aria-label="切换用户">
+          <span class="user-avatar" id="userAvatar">😀</span>
+          <span class="user-name" id="userName">小明</span>
+          <svg class="user-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="user-dropdown" id="userDropdown" hidden>
+          <div class="user-dropdown-list" id="userDropdownList"></div>
+          <div class="user-dropdown-divider"></div>
+          <button class="user-dropdown-add" id="userAddBtn">➕ 添加用户</button>
+        </div>
+        <button class="btn-icon" id="helpBtn" aria-label="使用说明" title="使用说明">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <!-- ===== Left Column: Timer Core ===== -->
+      <div class="timer-column">
+        <div class="mode-tabs" role="tablist" aria-label="计时模式">
+          <button class="mode-tab active" data-mode="pomodoro" role="tab" aria-selected="true">专注</button>
+          <button class="mode-tab" data-mode="shortBreak" role="tab" aria-selected="false">短休息</button>
+          <button class="mode-tab" data-mode="longBreak" role="tab" aria-selected="false">长休息</button>
+        </div>
+
+        <div class="timer-section">
+          <div class="timer-ring-container">
+            <svg class="timer-ring" viewBox="0 0 200 200" aria-hidden="true">
+              <circle class="ring-bg" cx="100" cy="100" r="88" />
+              <circle class="ring-progress" cx="100" cy="100" r="88"
+                stroke-dasharray="553" stroke-dashoffset="0"
+                stroke-linecap="round" />
+            </svg>
+            <div class="timer-display-wrap">
+              <div class="timer-display" id="timerDisplay" aria-live="polite">25:00</div>
+              <div class="status-label" id="statusLabel">准备开始</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="btn btn-primary" id="mainBtn">▶ 开始</button>
+          <button class="btn btn-secondary" id="skipBtn" title="跳过 (S)">⏭ 跳过</button>
+          <button class="btn btn-secondary" id="resetBtn" title="重置 (R)">↺ 重置</button>
+        </div>
+
+        <div class="pomodoro-info" id="pomodoroInfo">
+          <div class="pomo-label">今日专注</div>
+          <div class="pomo-dots" id="pomoDots"></div>
+          <div class="pomo-stats" id="pomoStats">0 个</div>
+        </div>
+      </div>
+
+      <!-- ===== Right Column: Sidebar ===== -->
+      <div class="sidebar-column">
+        <!-- ===== Task ===== -->
+        <div class="task-section">
+          <div class="task-input-wrap">
+            <svg class="task-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            <input type="text" class="task-input" id="taskInput" placeholder="当前专注任务..." maxlength="100" />
+          </div>
+        </div>
+
+        <!-- ===== History ===== -->
+        <div class="history-section">
+          <button class="btn btn-ghost history-toggle" id="historyToggle">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>记录</span>
+            <span class="history-badge" id="historyBadge">0</span>
+            <svg class="history-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="history-panel" id="historyPanel" hidden>
+            <div class="history-stats" id="historyStats"></div>
+            <div class="history-list" id="historyList"></div>
+            <div class="history-empty" id="historyEmpty">暂无记录，开始专注吧 🚀</div>
+          </div>
+        </div>
+
+        <!-- ===== Settings Trigger (opens third column) ===== -->
+        <button class="btn btn-ghost settings-open-btn" id="settingsToggle">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span id="settingsToggleText">设置</span>
+        </button>
+      </div>
+
+      <!-- ===== Settings Column (third column) ===== -->
+      <div class="settings-column" id="settingsColumn" hidden>
+        <div class="settings-col-header">
+          <h3>⚙️ 设置</h3>
+          <button class="btn-icon" id="settingsCloseBtn" aria-label="关闭设置">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="settings-col-body">
+          <div class="settings-col-section">
+            <h4>⏱ 计时设置</h4>
+            <div class="setting-row">
+              <label for="pomodoroSetting">🍅 专注</label>
+              <input type="number" id="pomodoroSetting" value="25" min="1" max="120" />
+              <span class="setting-unit">分钟</span>
+            </div>
+            <div class="setting-row">
+              <label for="shortBreakSetting">☕ 短休息</label>
+              <input type="number" id="shortBreakSetting" value="5" min="1" max="60" />
+              <span class="setting-unit">分钟</span>
+            </div>
+            <div class="setting-row">
+              <label for="longBreakSetting">🌿 长休息</label>
+              <input type="number" id="longBreakSetting" value="15" min="1" max="120" />
+              <span class="setting-unit">分钟</span>
+            </div>
+          </div>
+          <div class="settings-col-section">
+            <h4>🔊 声音与通知</h4>
+            <div class="setting-row setting-row-checkbox">
+              <label for="soundToggle">🔔 提示音</label>
+              <label class="toggle-switch">
+                <input type="checkbox" id="soundToggle" checked />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="setting-row setting-row-checkbox">
+              <label for="notifToggle">🔔 通知</label>
+              <label class="toggle-switch">
+                <input type="checkbox" id="notifToggle" checked />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="setting-row-bg">
+              <label for="bgSoundSelect">🎵 背景音</label>
+              <select id="bgSoundSelect">
+                <option value="none">关闭</option>
+                <option value="whitenoise">白噪音</option>
+                <option value="rain">雨声</option>
+                <option value="ocean">海浪</option>
+                <option value="forest">森林</option>
+              </select>
+            </div>
+            <div class="setting-row-vol">
+              <label for="bgSoundVolume">🔊 音量</label>
+              <input type="range" id="bgSoundVolume" min="0" max="100" value="50" />
+              <span class="vol-label" id="bgSoundVolumeLabel">50%</span>
+            </div>
+          </div>
+          <div class="settings-col-section">
+            <h4>🎨 主题</h4>
+            <div class="theme-options" id="themeOptions">
+              <button class="theme-swatch active" data-theme="default" style="background:linear-gradient(135deg,#0c0c1a 50%,#f97316 50%)" title="默认暗橙" aria-label="默认暗橙"></button>
+              <button class="theme-swatch" data-theme="light" style="background:linear-gradient(135deg,#f5f5f7 50%,#0071e3 50%)" title="极简亮白" aria-label="极简亮白"></button>
+              <button class="theme-swatch" data-theme="purple" style="background:linear-gradient(135deg,#0a0a12 50%,#a855f7 50%)" title="深邃暗紫" aria-label="深邃暗紫"></button>
+              <button class="theme-swatch" data-theme="forest" style="background:linear-gradient(135deg,#0a140a 50%,#22c55e 50%)" title="森林绿意" aria-label="森林绿意"></button>
+              <button class="theme-swatch" data-theme="neon" style="background:linear-gradient(135deg,#0a0a1a 50%,#06b6d4 50%)" title="霓虹蓝粉" aria-label="霓虹蓝粉"></button>
+              <button class="theme-swatch" data-theme="custom" style="background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red)" title="自定义配色" aria-label="自定义"></button>
+            </div>
+            <div class="custom-colors" id="customColors" hidden>
+              <div class="color-row">
+                <label>🖌️ 背景</label>
+                <input type="color" class="color-picker" id="colorBg" value="#0c0c1a" />
+              </div>
+              <div class="color-row">
+                <label>🃏 卡片</label>
+                <input type="color" class="color-picker" id="colorCard" value="#161628" />
+              </div>
+              <div class="color-row">
+                <label>📝 文字</label>
+                <input type="color" class="color-picker" id="colorText" value="#e8e8f0" />
+              </div>
+              <div class="color-row">
+                <label>🍅 专注色</label>
+                <input type="color" class="color-picker" id="colorFocus" value="#f97316" />
+              </div>
+              <div class="color-row">
+                <label>☕ 休息色</label>
+                <input type="color" class="color-picker" id="colorBreak" value="#22c55e" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="settings-col-footer">
+          <div class="data-actions">
+            <button class="btn btn-ghost" id="exportBtn">💾 导出数据</button>
+            <button class="btn btn-ghost" id="importBtn">📂 导入数据</button>
+            <input type="file" id="importFile" accept=".json" hidden />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Shortcut Hint ===== -->
+    <div class="shortcut-hint" id="shortcutHint">
+      <kbd>Space</kbd> 暂停/继续 · <kbd>R</kbd> 重置 · <kbd>S</kbd> 跳过
+    </div>
+  </div>
+
+  <!-- ===== Help Modal ===== -->
+  <div class="modal-overlay" id="helpModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-label="使用说明">
+      <div class="modal-header">
+        <h2>🍅 番茄钟 — 使用说明</h2>
+        <button class="btn-icon" id="helpCloseBtn" aria-label="关闭">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <section>
+          <h3>🎯 什么是番茄工作法？</h3>
+          <p>番茄工作法是一种时间管理方法：<strong>专注工作 25 分钟 → 短休息 5 分钟</strong>，每完成 4 个番茄后进行一次 15 分钟的<strong>长休息</strong>。如此循环，保持高效。</p>
+        </section>
+
+        <section>
+          <h3>⌨️ 快捷键</h3>
+          <div class="shortcut-grid">
+            <div class="shortcut-item"><kbd>Space</kbd> <span>开始 / 暂停</span></div>
+            <div class="shortcut-item"><kbd>R</kbd> <span>重置计时</span></div>
+            <div class="shortcut-item"><kbd>S</kbd> <span>跳过当前阶段</span></div>
+          </div>
+        </section>
+
+        <section>
+          <h3>📖 使用流程</h3>
+          <ol class="steps-list">
+            <li><strong>选择模式</strong>：专注 / 短休息 / 长休息</li>
+            <li><strong>设置任务</strong>：在输入框中写下当前要做的任务</li>
+            <li><strong>开始计时</strong>：点击「开始」按钮或按 <kbd>Space</kbd></li>
+            <li><strong>专注工作</strong>：直到计时结束，听到提示音</li>
+            <li><strong>休息</strong>：应用自动切换到休息模式</li>
+            <li><strong>每 4 轮</strong>：一次长休息，给大脑充分放松</li>
+          </ol>
+        </section>
+
+        <section>
+          <h3>⚙️ 设置</h3>
+          <p>点击「设置」按钮，可以自定义时长、提示音、通知、配色等。</p>
+        </section>
+
+        <section>
+          <h3>🧑 多用户</h3>
+          <p>点击右上角 <strong>😀 小明 ▼</strong> 切换用户，每个用户拥有<strong>独立的番茄计数、使用记录和配色方案</strong>。</p>
+          <ul class="tips-list">
+            <li>点击用户行直接切换</li>
+            <li>点击 ✎ 重命名，点击 ✕ 删除（至少保留一人）</li>
+            <li>点击「➕ 添加用户」创建新人</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>🎨 主题与自定义配色</h3>
+          <p>设置面板底部可选择 6 套预设主题，或使用「自定义配色」自由调节：</p>
+          <ul class="tips-list">
+            <li><strong>🖌️ 背景</strong> — 页面整体底色</li>
+            <li><strong>🃏 卡片</strong> — 计时器卡片底色</li>
+            <li><strong>📝 文字</strong> — 所有文字颜色（次文字自动衍生）</li>
+            <li><strong>🍅 专注色</strong> — 专注模式的圆环和按钮</li>
+            <li><strong>☕ 休息色</strong> — 休息模式的圆环和按钮</li>
+            <li>配色自动跟随用户，切换用户时一起切换</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>📋 使用记录</h3>
+          <p>每次专注完成自动记录。点击「记录」展开面板，查看当前用户的：</p>
+          <ul class="tips-list">
+            <li>今日专注次数和总时长</li>
+            <li>累计专注统计</li>
+            <li>最近 20 条详细记录（任务、时长、时间）</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>💾 数据备份</h3>
+          <p>设置面板底部提供 <strong>导出/导入</strong> 功能：</p>
+          <ul class="tips-list">
+            <li><strong>💾 导出数据</strong> — 下载备份文件，带走所有数据</li>
+            <li><strong>📂 导入数据</strong> — 在别的浏览器/电脑上恢复</li>
+            <li>支持跨浏览器、跨设备迁移</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>💡 小贴士</h3>
+          <ul class="tips-list">
+            <li>完成一个番茄后，圆点会亮起 🟠</li>
+            <li>计时运行时切换模式会重置计时</li>
+            <li>所有数据（用户、记录、配色）自动保存，关闭页面不丢失</li>
+            <li>导出备份文件可跨浏览器/跨设备迁移</li>
+          </ul>
+        </section>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="helpOkBtn">知道了 👍</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

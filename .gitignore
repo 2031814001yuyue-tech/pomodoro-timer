@@ -1,0 +1,4 @@
+# 番茄钟项目 — 纯前端，无需忽略太多
+.DS_Store
+Thumbs.db
+*.log
